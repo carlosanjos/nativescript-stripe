@@ -80,3 +80,29 @@ export const enum StripePaymentIntentStatus {
   RequiresCapture = "requires_capture",
   Canceled = "canceled"
 }
+
+export const enum StripeSetupIntentStatus {
+  Unknown = 0,
+  RequiresPaymentMethod = 1,
+  RequiresConfirmation = 2,
+  RequiresAction = 3,
+  Processing = 4,
+  Succeeded = 5,
+  Canceled = 6,
+}
+
+export interface StripeSetupIntentCommon {
+  readonly native: any;
+  id: string;
+  clientSecret: string;
+  created: Date;
+  customerID: string;
+  paymentMethodID: string;
+  status: StripeSetupIntentStatus;
+}
+
+export const enum StripePaymentHandlerActionStatus {
+  Succeeded = 0,
+  Canceled = 1,
+  Failed = 2,
+}

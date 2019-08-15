@@ -7,6 +7,7 @@ export declare class Stripe {
 
   retrievePaymentIntent(clientSecret: string, cb: (error: Error, pm: StripePaymentIntent) => void): void;
   confirmPaymentIntent(pi: StripePaymentIntent, returnUrl: string, cb: (error: Error, pm: StripePaymentIntent) => void): void;
+  confirmSetupIntent(paymentMethod: PaymentMethod, clientSecret: string, callback: (setupItent: StripeSetupIntent, error: Error) => void): void;
 }
 export declare class CreditCardViewBase extends View { }
 export declare type CardBrand = "Visa" | "Amex" | "MasterCard" | "Discover" | "JCB" | "DinersClub" | "Unknown";
@@ -169,4 +170,45 @@ export declare const enum StripeRedirectState {
   InProgress = 1,
   Cancelled = 2,
   Completed = 3
+}
+
+export declare class StripeSetupIntentConfirmParams {
+  readonly native: any;
+  clientSecret: string;
+  paymentMethodParams: any;
+  paymentMethodId: string;
+  returnURL: string;
+  useStripeSDK: number;  
+}
+
+export declare class StripeSetupIntent implements StripeSetupIntentCommon {
+  native: any;
+  static fromNative(native: any): StripeSetupIntent;
+  static fromApi(json: any): StripeSetupIntent;
+  readonly id: string;
+  readonly clientSecret: string;
+  readonly paymentMethodID: string;
+  readonly customerID: string;
+  readonly status: StripeSetupIntentStatus;
+  readonly created: Date;
+}
+
+export interface StripeSetupIntentCommon {
+  readonly native: any;
+  id: string;
+  clientSecret: string;
+  created: Date;
+  customerID: string;
+  paymentMethodID: string;
+  status: StripeSetupIntentStatus;
+}
+
+export const enum StripeSetupIntentStatus {
+  Unknown = 0,
+  RequiresPaymentMethod = 1,
+  RequiresConfirmation = 2,
+  RequiresAction = 3,
+  Processing = 4,
+  Succeeded = 5,
+  Canceled = 6,
 }

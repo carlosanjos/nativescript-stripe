@@ -1,5 +1,13 @@
 import { View } from 'tns-core-modules/ui/core/view';
-import { CardBrand, CardCommon, CreditCardViewBase, PaymentMethodCommon, StripePaymentIntentCommon, StripePaymentIntentStatus, Token } from './stripe.common';
+import { CardBrand, CardCommon, CreditCardViewBase, PaymentMethodCommon, StripePaymentIntentCommon, StripePaymentIntentStatus, Token, StripeSetupIntentCommon, StripeSetupIntentStatus, StripePaymentHandlerActionStatus } from './stripe.common';
+
+class StripeAuthenticationContext extends NSObject implements STPAuthenticationContext {
+  public static ObjCProtocols = [ STPAuthenticationContext ];
+
+  authenticationPresentingViewController(): UIViewController {
+    return UIApplication.sharedApplication.keyWindow.rootViewController;
+  }
+}
 
 export class Stripe {
   constructor(apiKey: string) {
@@ -70,6 +78,20 @@ export class Stripe {
     apiClient.confirmPaymentIntentWithParamsCompletion(
       params,
       callback(cb, (pi) => StripePaymentIntent.fromNative(pi))
+    );
+  }
+
+  confirmSetupIntent(paymentMethod: PaymentMethod, clientSecret: string, callback: (setupItent: StripeSetupIntent , error: Error) => void): void {
+    const paymentHandler = STPPaymentHandler.sharedHandler();
+    const params = STPSetupIntentConfirmParams.alloc().initWithClientSecret(clientSecret);
+    params.paymentMethodID = paymentMethod.id;
+
+    paymentHandler.confirmSetupIntentWithAuthenticationContextCompletion(
+      params,
+      new StripeAuthenticationContext(),
+      (handlerActionStatus: STPPaymentHandlerActionStatus, setupIntent: STPSetupIntent, error: NSError) => {
+        callback(error ? null : StripeSetupIntent.fromNative(setupIntent), error ? new Error(error.localizedDescription) : null);
+      }
     );
   }
 }
@@ -502,4 +524,86 @@ export const enum StripeRedirectState {
   InProgress = 1,
   Cancelled = 2,
   Completed = 3
+}
+
+export class StripeSetupIntentConfirmParams {
+  clientSecret: string;
+  paymentMethodParams: any;
+  paymentMethodId: string;
+  returnURL: string;  // a URL that opens your app
+  useStripeSDK: number;
+
+  get native(): STPSetupIntentConfirmParams {
+    const n = STPSetupIntentConfirmParams.alloc().initWithClientSecret(this.clientSecret);
+    n.clientSecret = this.clientSecret;
+    n.paymentMethodParams = this.paymentMethodParams;
+    n.paymentMethodID = this.paymentMethodId;
+    n.returnURL = this.returnURL;
+    n.useStripeSDK = this.useStripeSDK;
+    return n;
+  }
+}
+
+export class StripeSetupIntent implements StripeSetupIntentCommon {
+  native: STPSetupIntent;
+
+  static fromNative(native: STPSetupIntent): StripeSetupIntent {
+    const setupIntent = new StripeSetupIntent();
+    setupIntent.native = native;
+
+    return setupIntent;
+  }
+
+  static fromApi(json: any): StripeSetupIntent {
+    const native = STPSetupIntent.decodedObjectFromAPIResponse(json);
+
+    return StripeSetupIntent.fromNative(native);
+  }
+
+  get id(): string {
+    return this.native.stripeID;
+  }
+
+  get clientSecret(): string {
+    return this.native.clientSecret;
+  }
+
+  get paymentMethodID(): string {
+    return this.native.paymentMethodID;
+  }
+
+
+  get customerID(): string {
+    return this.native.customerID;
+  }
+
+  get status(): StripeSetupIntentStatus {
+    switch (this.native.status) {
+
+      case STPSetupIntentStatus.Unknown:
+        return StripeSetupIntentStatus.Unknown;
+
+      case STPSetupIntentStatus.RequiresPaymentMethod:
+        return StripeSetupIntentStatus.RequiresPaymentMethod;
+
+      case STPSetupIntentStatus.RequiresConfirmation:
+        return StripeSetupIntentStatus.RequiresAction;
+
+      case STPSetupIntentStatus.Processing:
+        return StripeSetupIntentStatus.Processing;
+
+      case STPSetupIntentStatus.Succeeded:
+        return StripeSetupIntentStatus.Succeeded;
+
+      case STPSetupIntentStatus.Canceled:
+        return StripeSetupIntentStatus.Canceled;
+
+      default:
+        return null;
+    }
+  }
+
+  get created(): Date {
+    return new Date(this.native.created);
+  }
 }
