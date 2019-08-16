@@ -36,7 +36,7 @@ export class StripeConfig extends StripeConfigCommon {
       config.requiredShippingAddressFields = fields;
     }
     if (this.companyName) config.companyName = this.companyName;
-    config.createCardSources = this.createCardSources;
+    // config.createCardSources = this.createCardSources;
     return config;
   }
 
@@ -189,16 +189,17 @@ class StripePaymentDelegate extends NSObject implements STPPaymentContextDelegat
   }
 
   paymentContextDidCreatePaymentResultCompletion(paymentContext: STPPaymentContext, paymentResult: STPPaymentResult, completion: (p1: NSError) => void): void {
-    StripeConfig.shared().backendAPI.completeCharge(
-      paymentResult.source.stripeID,
-      paymentContext.paymentAmount,
-      createShippingMethod(paymentContext),
-      createAddress(paymentContext.shippingAddress))
-      .then(() => {
-        completion(null);
-      }).catch(e => {
-        completion(createError("PaymentError", 100, e));
-      });
+    // StripeConfig.shared().backendAPI.completeCharge(
+    //   paymentContext.paymentMethod.
+    //   // paymentResult.source.stripeID,
+    //   paymentContext.paymentAmount,
+    //   createShippingMethod(paymentContext),
+    //   createAddress(paymentContext.shippingAddress))
+    //   .then(() => {
+    //     completion(null);
+    //   }).catch(e => {
+    //     completion(createError("PaymentError", 100, e));
+    //   });
   }
 
   paymentContextDidFailToLoadWithError(paymentContext: STPPaymentContext, error: NSError): void {

@@ -523,24 +523,6 @@ export const enum StripeRedirectState {
   Completed = 3
 }
 
-export class StripeSetupIntentConfirmParams {
-  clientSecret: string;
-  paymentMethodParams: any;
-  paymentMethodId: string;
-  returnURL: string;  // a URL that opens your app
-  useStripeSDK: number;
-
-  get native(): STPSetupIntentConfirmParams {
-    const n = STPSetupIntentConfirmParams.alloc().initWithClientSecret(this.clientSecret);
-    n.clientSecret = this.clientSecret;
-    n.paymentMethodParams = this.paymentMethodParams;
-    n.paymentMethodID = this.paymentMethodId;
-    n.returnURL = this.returnURL;
-    n.useStripeSDK = this.useStripeSDK;
-    return n;
-  }
-}
-
 export class StripeSetupIntent implements StripeSetupIntentCommon {
   native: STPSetupIntent;
 
