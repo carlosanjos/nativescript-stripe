@@ -7,7 +7,7 @@ export declare class Stripe {
 
   retrievePaymentIntent(clientSecret: string, cb: (error: Error, pm: StripePaymentIntent) => void): void;
   confirmPaymentIntent(pi: StripePaymentIntent, returnUrl: string, cb: (error: Error, pm: StripePaymentIntent) => void): void;
-  confirmSetupIntent(paymentMethod: PaymentMethod, clientSecret: string, callback: (setupItent: StripeSetupIntent, error: Error) => void): void;
+  confirmSetupIntent(paymentMethod: PaymentMethod, clientSecret: string, cb: (error: Error, pm: StripeSetupIntent) => void): void;
 }
 export declare class CreditCardViewBase extends View { }
 export declare type CardBrand = "Visa" | "Amex" | "MasterCard" | "Discover" | "JCB" | "DinersClub" | "Unknown";

@@ -81,7 +81,7 @@ export class Stripe {
     );
   }
 
-  confirmSetupIntent(paymentMethod: PaymentMethod, clientSecret: string, callback: (setupItent: StripeSetupIntent , error: Error) => void): void {
+  confirmSetupIntent(paymentMethod: PaymentMethod, clientSecret: string, cb: (error: Error, setupItent: StripeSetupIntent) => void): void {
     const paymentHandler = STPPaymentHandler.sharedHandler();
     const params = STPSetupIntentConfirmParams.alloc().initWithClientSecret(clientSecret);
     params.paymentMethodID = paymentMethod.id;
@@ -90,7 +90,7 @@ export class Stripe {
       params,
       new StripeAuthenticationContext(),
       (handlerActionStatus: STPPaymentHandlerActionStatus, setupIntent: STPSetupIntent, error: NSError) => {
-        callback(error ? null : StripeSetupIntent.fromNative(setupIntent), error ? new Error(error.localizedDescription) : null);
+        cb(error ? new Error(error.localizedDescription) : null, error ? null : StripeSetupIntent.fromNative(setupIntent));
       }
     );
   }
