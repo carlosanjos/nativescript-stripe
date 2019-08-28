@@ -4,10 +4,11 @@ export declare class Stripe {
   constructor(apiKey: string);
   createToken(card: CardCommon, cb: (error: Error, token: Token) => void): void;
   createPaymentMethod(card: CardCommon, cb: (error: Error, pm: PaymentMethod) => void): void;
-
   retrievePaymentIntent(clientSecret: string, cb: (error: Error, pm: StripePaymentIntent) => void): void;
-  confirmPaymentIntent(pi: StripePaymentIntent, returnUrl: string, cb: (error: Error, pm: StripePaymentIntent) => void): void;
-  confirmSetupIntent(paymentMethod: PaymentMethod, clientSecret: string, cb: (error: Error, pm: StripeSetupIntent) => void): void;
+  confirmPaymentIntent(pi: StripePaymentIntentParams, cb: (error: Error, pm: StripePaymentIntent) => void): void;
+  confirmSetupIntent(paymentMethodId: string, clientSecret: string, cb: (error: Error, pm: StripePaymentIntent) => void): void;
+  authenticateSetupIntent(clientSecret: string, returnUrl: string, cb: (error: Error, pm: StripeSetupIntent) => void): void;
+  authenticatePaymentIntent(clientSecret: string, returnUrl: string, cb: (error: Error, pm: StripePaymentIntent) => void): void;
 }
 export declare class CreditCardViewBase extends View { }
 export declare type CardBrand = "Visa" | "Amex" | "MasterCard" | "Discover" | "JCB" | "DinersClub" | "Unknown";
@@ -127,10 +128,19 @@ export declare class StripePaymentIntent implements StripePaymentIntentCommon {
   paymentMethodId: string;
   sourceId: string;
   requiresAction: boolean; // true if status == RequiresAction
+  requiresConfirmation: boolean;
+  requiresCapture: boolean;
   status: StripePaymentIntentStatus;
 
   static fromNative(native: any): StripePaymentIntent;
   static fromApi(json: any): StripePaymentIntent;
+}
+
+export declare class StripeSetupIntent {
+  id: string;
+  clientSecret: string;
+  requiresAction: boolean; // true if status == RequiresAction
+  status: StripePaymentIntentStatus;
 }
 
 export declare const enum StripePaymentIntentStatus {
@@ -170,45 +180,4 @@ export declare const enum StripeRedirectState {
   InProgress = 1,
   Cancelled = 2,
   Completed = 3
-}
-
-export declare class StripeSetupIntentConfirmParams {
-  readonly native: any;
-  clientSecret: string;
-  paymentMethodParams: any;
-  paymentMethodId: string;
-  returnURL: string;
-  useStripeSDK: number;  
-}
-
-export declare class StripeSetupIntent implements StripeSetupIntentCommon {
-  native: any;
-  static fromNative(native: any): StripeSetupIntent;
-  static fromApi(json: any): StripeSetupIntent;
-  readonly id: string;
-  readonly clientSecret: string;
-  readonly paymentMethodID: string;
-  readonly customerID: string;
-  readonly status: StripeSetupIntentStatus;
-  readonly created: Date;
-}
-
-export interface StripeSetupIntentCommon {
-  readonly native: any;
-  id: string;
-  clientSecret: string;
-  created: Date;
-  customerID: string;
-  paymentMethodID: string;
-  status: StripeSetupIntentStatus;
-}
-
-export const enum StripeSetupIntentStatus {
-  Unknown = 0,
-  RequiresPaymentMethod = 1,
-  RequiresConfirmation = 2,
-  RequiresAction = 3,
-  Processing = 4,
-  Succeeded = 5,
-  Canceled = 6,
 }
